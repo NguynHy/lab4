@@ -1,0 +1,172 @@
+package Labtuan4;
+
+import java.util.Scanner;
+
+class Xe {
+    protected String soxe;
+    protected String loai;
+    protected String ngaydk;
+    protected boolean trthai;
+
+    public Xe() {
+        this.soxe = "";
+        this.loai = "";
+        this.ngaydk = "";
+        this.trthai = true;
+    }
+
+    public Xe(Xe other) {
+        this.soxe = other.soxe;
+        this.loai = other.loai;
+        this.ngaydk = other.ngaydk;
+        this.trthai = other.trthai;
+    }
+
+    public void nhap(Scanner sc) {
+        System.out.print("Nhập số xe: ");
+        soxe = sc.nextLine();
+        System.out.print("Nhập loại xe: ");
+        loai = sc.nextLine();
+        System.out.print("Nhập ngày đăng kiểm (dd/MM/yyyy): ");
+        ngaydk = sc.nextLine();
+        System.out.print("Xe có được phép lưu hành không (true/false): ");
+        trthai = Boolean.parseBoolean(sc.nextLine());
+    }
+
+    public void in() {
+        System.out.println("Số xe: " + soxe);
+        System.out.println("Loại xe: " + loai);
+        System.out.println("Ngày đăng kiểm: " + ngaydk);
+        System.out.println("Trạng thái lưu hành: " + (trthai ? "Cho phép" : "Không cho phép"));
+    }
+
+    public String getLoai() {
+        return loai;
+    }
+
+    public boolean isLuuHanh() {
+        return trthai;
+    }
+
+    public String getThangNam() {
+        if (ngaydk != null && ngaydk.contains("/")) {
+            String[] parts = ngaydk.split("/");
+            if (parts.length == 3) {
+                return parts[1] + "/" + parts[2];
+            }
+        }
+        return "";
+    }
+}
+
+class ChuyenXe extends Xe {
+    private int msc;
+    private String ten;
+    private String noiden;
+    private double doanhthu;
+
+    public ChuyenXe() {
+        super();
+        this.msc = 0;
+        this.ten = "";
+        this.noiden = "";
+        this.doanhthu = 0.0;
+    }
+
+    @Override
+    public void nhap(Scanner sc) {
+        super.nhap(sc);
+        System.out.print("Nhập mã số chuyến xe: ");
+        msc = Integer.parseInt(sc.nextLine());
+        System.out.print("Nhập tên tài xế: ");
+        ten = sc.nextLine();
+        System.out.print("Nhập nơi đến: ");
+        noiden = sc.nextLine();
+        System.out.print("Nhập doanh thu: ");
+        doanhthu = Double.parseDouble(sc.nextLine());
+    }
+
+    @Override
+    public void in() {
+        super.in();
+        System.out.println("Mã số chuyến xe: " + msc);
+        System.out.println("Tên tài xế: " + ten);
+        System.out.println("Nơi đến: " + noiden);
+        System.out.println("Doanh thu: " + doanhthu);
+        System.out.println("Lợi nhuận (30% doanh thu): " + getLoiNhuan());
+    }
+
+    public int getMsc() {
+        return msc;
+    }
+
+    public double getDoanhthu() {
+        return doanhthu;
+    }
+
+    public double getLoiNhuan() {
+        return doanhthu * 0.3;
+    }
+}
+
+public class Main3 {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        Xe x1 = new Xe();
+        System.out.println("Nhập thông tin xe x1:");
+        x1.nhap(sc);
+
+        System.out.println("\nThông tin xe x1:");
+        x1.in();
+
+        Xe x2 = new Xe(x1);
+        System.out.println("\nThông tin xe x2 (copy từ x1):");
+        x2.in();
+
+        System.out.print("\nNhập số lượng chuyến xe: ");
+        int n = Integer.parseInt(sc.nextLine());
+
+        ChuyenXe[] ds = new ChuyenXe[n];
+        for (int i = 0; i < n; i++) {
+            System.out.println("\nNhập thông tin chuyến xe thứ " + (i + 1) + ":");
+            ds[i] = new ChuyenXe();
+            ds[i].nhap(sc);
+        }
+
+        System.out.println("\nDanh sách các chuyến xe:");
+        for (int i = 0; i < n; i++) {
+            System.out.println("\nChuyến xe thứ " + (i + 1) + ":");
+            ds[i].in();
+        }
+
+        System.out.println("\nCác chuyến xe bị hủy (không lưu hành hoặc doanh thu < 100.000):");
+        for (int i = 0; i < n; i++) {
+            if (!ds[i].isLuuHanh() || ds[i].getDoanhthu() < 100000) {
+                System.out.println("Mã số chuyến xe bị hủy: " + ds[i].getMsc());
+            }
+        }
+
+        System.out.println("\nTổng lợi nhuận theo loại xe và tháng-năm:");
+        for (int i = 0; i < n; i++) {
+            boolean daThongKe = false;
+            for (int j = 0; j < i; j++) {
+                if (ds[i].getLoai().equals(ds[j].getLoai()) && ds[i].getThangNam().equals(ds[j].getThangNam())) {
+                    daThongKe = true;
+                    break;
+                }
+            }
+            if (!daThongKe) {
+                double tongLoiNhuan = 0;
+                for (int k = 0; k < n; k++) {
+                    if (ds[i].getLoai().equals(ds[k].getLoai()) && ds[i].getThangNam().equals(ds[k].getThangNam())) {
+                        tongLoiNhuan += ds[k].getLoiNhuan();
+                    }
+                }
+                System.out.println("Loại xe: " + ds[i].getLoai() + ", Tháng/Năm: " + ds[i].getThangNam() + ", Tổng lợi nhuận: " + tongLoiNhuan);
+            }
+        }
+
+        sc.close();
+    }
+}
